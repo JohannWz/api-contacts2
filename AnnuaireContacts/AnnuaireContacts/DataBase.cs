@@ -10,14 +10,16 @@ namespace AnnuaireContacts
 {
     public class DataBase
     {
-        private SqlConnection con = new SqlConnection(@"Data Source=REPEDA-DCG55M2\SQLEXPRESS02;Initial Catalog=AnnuaireContact;Integrated Security=True");
+        private SqlConnection con = new SqlConnection(@"Data Source=REPEDA-DCG55M2\SQLEXPRESS02;Initial Catalog=AnnuaireContacts;Integrated Security=True");
+        String requete;
 
         public User RecupererUser(String email, String password)
         {
             User u = new User();
 
             con.Open();
-            SqlCommand req = new SqlCommand("SELECT * FROM User WHERE email = '" + email + "' AND password = '" + password + "'", con);
+            requete = "SELECT email FROM Users WHERE email = '" + email + "' AND password = '" + password + "'";
+            SqlCommand req = new SqlCommand(requete, con);
             SqlDataReader r = req.ExecuteReader();
             if (r.HasRows)
             {

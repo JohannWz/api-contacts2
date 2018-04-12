@@ -21,21 +21,36 @@ namespace AnnuaireContacts
             Connexion connexion = new Connexion(tbEmail.Text, tbMdp.Text);
             Requete maRequete = new Requete();
             Boolean connecte = maRequete.SeConnecter(connexion);
+            DataBase db = new DataBase();
+            User u = db.RecupererUser(tbEmail.Text, tbMdp.Text);
 
+            // Si je suis connecté via l'API
             if (connecte)
             {
                 String json = maRequete.GetResult();
                 FluxConnexion monFlux = JsonConvert.DeserializeObject<FluxConnexion>(json);
+
+                // Si l'utilisateur n'existe pas en BDD locale
+                if (u == null)
+                {
+                    u.id = monFlux.user.id;
+                    u.name = monFlux.user.name;
+                    u.email = monFlux.user.email;
+                    u.password = tbMdp.Text;
+                    db.EnregistrerUser(u);
+                }
 
                 Session["FluxConnexion"] = monFlux;
                 Response.Redirect("ListeContacts.aspx");
             } 
             else
             {
-                DataBase db = new DataBase();
-                User u = db.RecupererUser(tbEmail.Text, tbMdp.Text);
-                //if (u != null)
-
+                // Si je suis connecté en local              
+                if (u != null)
+                {
+                    Session["User"] = u;
+                    Response.Redirect("ListeContacts.aspx");
+                }
             }
         }
     }
