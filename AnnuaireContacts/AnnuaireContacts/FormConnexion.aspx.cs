@@ -24,14 +24,14 @@ namespace AnnuaireContacts
             DataBase db = new DataBase();
             User u = db.RecupererUser(tbEmail.Text, tbMdp.Text);
 
-            // Si je suis connecté via l'API
+            // Si l'utilisateur est connecté via l'API
             if (connecte)
             {
                 String json = maRequete.GetResult();
                 FluxConnexion monFlux = JsonConvert.DeserializeObject<FluxConnexion>(json);
 
                 // Si l'utilisateur n'existe pas en BDD locale
-                if (u == null)
+                if (u.name == null)
                 {
                     u.id = monFlux.user.id;
                     u.name = monFlux.user.name;
@@ -39,13 +39,20 @@ namespace AnnuaireContacts
                     u.password = tbMdp.Text;
                     db.EnregistrerUser(u);
                 }
+                // Si l'id user a changé (création d'un nouveau compte avec le même email et le même mot de passe)
+                else if (u.id != monFlux.user.id)
+                {
+                    long old_id = u.id;
+                    u.id = monFlux.user.id;
+                    db.ModifierUser(u, old_id);
+                }
 
                 Session["FluxConnexion"] = monFlux;
                 Response.Redirect("ListeContacts.aspx");
             } 
             else
             {
-                // Si je suis connecté en local              
+                // Si l'utilisateur est connecté en local              
                 if (u != null)
                 {
                     Session["User"] = u;
